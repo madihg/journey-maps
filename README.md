@@ -22,8 +22,10 @@ function newConnection(socket){
   //this section will have one or more event listeners that line up with various things that can happen on the client side (like sending a message in a chat app)
 	socket.on('myEvent', myEventHandler);
 	function myEventHandler(data){
-		//what you do in response to the event goes here
-    //often you'll want one of the four events listed below
+    //what you do in response to the event goes here
+    //often you'll want one of the four 'emit' events listed below
+    socket.broadcast.emit('myServerEvent', data);
+		
 	}
 }
 ```
@@ -61,8 +63,27 @@ socket.on('nameOfServerEvent', function(data){
   //the code you want to use on the data sent back from the server
 }
 ```
-For example a chat app might send a new message to the server like so:
+
+
+#### Message Passing Example: Chat Room
+A user logs into a chat room using socket.io. Once the page loads a connection is established, giving the user a unique id and trigger the newConnection function through the following part of the server code 
+```javascript
+io.sockets.on('connection', newConnection);
+function newConnection(socket){
+ //...
+}
+```
+The user enters their username on the client, and then types and sends a message into the chatroom. The following client-side code sends the message:
 ```javascript
 socket.emit('newMsg', {username:username, msg:msg});
 ```
-
+This is then handled by the appropriate handler on the server (with the matching name)
+```javascript
+function newConnection(socket){
+   socket.on('newMsg', function(data){
+     //the same data from the client is sent to all other clients
+     socket.broadcast.emit('newMsgFromServer', data)
+   }
+}
+```
+The server receives the message and then sends it out to all other connected c

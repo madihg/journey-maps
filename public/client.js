@@ -1,6 +1,6 @@
 var username = prompt('Please enter a username:')
 var socket = io()
-socket.on('newMsg', function(data){
+socket.on('newMsgFromServer', function(data){
 	addMsg(data.username, data.msg)
 })
 $('input').focus()

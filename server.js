@@ -13,7 +13,7 @@ function newConnection(socket){
 	
 	socket.on('newMsg', newMsg);
 	function newMsg(data){
-		socket.broadcast.emit('newMsg', data);
+		socket.broadcast.emit('newMsgFromServer', data);
 		//the line below will send to everyone including the client
 		// io.sockets.emit('mouse', data);
 		console.log(data)
