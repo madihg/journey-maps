@@ -1,27 +1,44 @@
-Welcome to the Glitch BETA
-=========================
+Welcome to Glitch 
+================
 
 Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
 
-**Glitch** is the friendly commmunity where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
 
-Find out more [about Glitch](https://glitch.com/about).
+Socket.io Cheat Sheet
+====================
+
+#### Server Side
+Just about all of your socket.io programs are going to want the following boilerplate in the server.js file.
+```javascript
+var socket = require('socket.io');
+var io = socket(server);
+
+io.sockets.on('connection', newConnection);
+
+//This function will be called whenever a new web browser visits the page. It runs as soon as a connection is set up with the server.
+function newConnection(socket){
+	console.log('new connection: ' + socket.id)
+	//we put all the rest of our code inside that connection, because we only want it to run once we're connected
+  //this section 
+	socket.on('myEvent', myResponse);
+	function myEventHandler(data){
+		//what you do in response to the event goes here
+    //often you'll want one of the four events listed below
+	}
+}
+```
 
 
-Your Project
-------------
+```javascript
+// sending to sender-client only
+  socket.emit('message', "this is a test");
 
-On the front-end,
-- edit `public/client.js`, `public/style.css` and `views/index.html`
-- drag in `assets`, like images or music, to add them to your project
+ // sending to all clients, include sender
+  io.emit('message', "this is a test");
 
-On the back-end,
-- your app starts at `server.js`
-- add frameworks and packages in `package.json`
-- safely store app secrets in `.env` (nobody can see this but you and people you invite)
+ // sending to all clients except sender
+  socket.broadcast.emit('message', "this is a test");
 
-
-Made by [Fog Creek](https://fogcreek.com/)
--------------------
-
-\ ゜o゜)ノ
+ // sending to individual socketid
+  socket.broadcast.to(socketid).emit('message', 'for your eyes only');
+```
