@@ -1,5 +1,5 @@
 var username = prompt('Please enter a username:')
-var socket = io.connect('https://zany-polyester.glitch.me')
+var socket = io('https://zany-polyester.glitch.me/')
 socket.on('newMsg', function(data){
 	addMsg(data.username, data.msg)
 })
