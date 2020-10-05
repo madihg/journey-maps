@@ -1,38 +1,9 @@
-<style>
-div {
-	position:fixed;
-	left:50%;
-	margin-left:-400px;
-	width:800px;
-}
-#chatForm {
-	bottom: 10%;
-}
-#messages {
-	top: 5%;
-	max-height: 80%;
-  overflow-y:scroll;
-}
-#messages p {
-	font-size: 20px;
-}
-#messages p:nth-child(even) {
-	background-color: #bbb;
-}
-input {
-	width:80%;
-	/*margin-left: 10%;*/
-	height:28px;
-}
-</style>
-<div id ='messages'></div>
-<div id='chatForm'>
-<input type=text>
-<button>Send</button>
-</div>
+
+
+<!-- Put your html above these scripts -->
 <script
   src="https://code.jquery.com/jquery-2.2.4.min.js"
   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   crossorigin="anonymous"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js" integrity="sha512-AcZyhRP/tbAEsXCCGlziPun5iFvcSUpEz2jKkx0blkYKbxU81F+iq8FURwPn1sYFeksJ+sDDrI5XujsqSobWdQ==" crossorigin="anonymous"></script>
 <script src='client.js'></script>
