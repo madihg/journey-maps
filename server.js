@@ -16,6 +16,9 @@ let io = socket(server, {
 io.sockets.on('connection', newConnection);
 
 function newConnection(socket){
+  socket.on("sendMessage", function(message){
+    io.emit("sendMessage", message)
+  })
   // socket.on("newMsg", function(data){
   // //send a message to everyone
   //   io.emit("newMsgFromServer", data)
