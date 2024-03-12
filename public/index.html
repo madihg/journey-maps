@@ -1,23 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkbox Sync</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta viewport="width=device-width, initial-scale=1.0" />
+    <title>World Map Drawing</title>
     <style>
-        .checkbox-container { display: flex; flex-wrap: wrap; }
-        .checkbox-container input { margin: 10px; }
+      #map-container {
+        position: relative;
+        width: 100%;
+        max-width: 720px; /* Adjust based on your map image size */
+        margin: auto;
+        transform: rotate(90deg);
+      }
+      #map-image {
+        width: 100%;
+        height: auto;
+      }
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .code-text {
+        font-family: "Courier New", monospace; /* Gives a code-like appearance */
+        position: fixed; /* Positions the div relative to the nearest positioned ancestor */
+        top: 10px; /* Aligns the top edge of the element with the top edge of its nearest positioned ancestor */
+        left: 10px; /* Aligns the left edge of the element with the left edge of its nearest positioned ancestor */
+        z-index: 10;
+        border: 1px solid black; /* Adds a thin black border */
+        padding: 10px; /* Adds space between the text and the border */
+        margin: 10px; /* Adds space outside the border */
+        background-color: white;
+      }
     </style>
-</head>
-<body>
-<div class="checkbox-container">
-    <!-- JavaScript will insert checkboxes here -->
-</div>
-<div>Your Score: <span id="user-score">0</span></div>
-<div>Total Checked: <span id="total-checked">0</span></div>
+  </head>
+  <body>
+    <div class="code-text">Click on the place you left and the place you arrived.</div>
+    <div id="map-container">
+      <img
+        id="map-image"
+        src="https://i.pinimg.com/originals/4e/af/1f/4eaf1fd1e1963085158baf21cbb1b5b9.jpg"
+        alt="World Map"
+      />
+      <canvas></canvas>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
-<script src="client.js"></script>
-  
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
+    <script src="client.js"></script>
+  </body>
 </html>

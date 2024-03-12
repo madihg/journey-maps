@@ -1,37 +1,35 @@
 const socket = io();
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+const mapContainer = document.getElementById('map-container');
+const mapImage = document.getElementById('map-image');
+const points = []; // Local storage of points
 
-// Generate 100 checkboxes
-const container = document.querySelector('.checkbox-container');
-for (let i = 0; i < 100; i++) {
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.dataset.index = i; // Keep track of the checkbox index
-    checkbox.addEventListener('click', (e) => {
-        const index = e.target.dataset.index;
-        socket.emit('checkboxClicked', index);
-        // Prevent default checkbox behavior to wait for server sync
-        e.preventDefault();
-    });
-    container.appendChild(checkbox);
-}
+// Adjust canvas size to match the map image
+canvas.width = mapImage.offsetWidth;
+canvas.height = mapImage.offsetHeight;
 
-// Listen for setup
-socket.on('setup', ({ checkedCheckboxes, score }) => {
-    document.getElementById('user-score').textContent = score;
-    updateCheckboxes(checkedCheckboxes);
+mapContainer.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const point = { x: x / canvas.width, y: y / canvas.height }; // Normalize points
+
+    points.push(point);
+    drawLine();
+    socket.emit('drawLine', point); // Send point to server
 });
 
-// Listen for updates from server
-socket.on('update', ({ checkedCheckboxes, totalChecked, userScores }) => {
-    const score = userScores[socket.id];
-    document.getElementById('user-score').textContent = score;
-    document.getElementById('total-checked').textContent = totalChecked;
-    updateCheckboxes(checkedCheckboxes);
-});
-
-function updateCheckboxes(checkedCheckboxes) {
-    const checkboxes = document.querySelectorAll('.checkbox-container input');
-    checkboxes.forEach((checkbox, index) => {
-        checkbox.checked = checkedCheckboxes[index];
-    });
+function drawLine() {
+    if (points.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x * canvas.width, points[0].y * canvas.height);
+    points.forEach(point => ctx.lineTo(point.x * canvas.width, point.y * canvas.height));
+    ctx.stroke();
 }
+
+// Listen for line drawing from other users
+socket.on('drawLine', (point) => {
+    points.push(point);
+    drawLine();
+});
