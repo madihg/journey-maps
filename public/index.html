@@ -1,40 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Map</title>
     <style>
-        #map-container {
-            position: relative;
-            width: 100%;
-            max-width: 720px; /* Adjust based on your map image size */
-            margin: auto;
-        }
-        #map-image {
-            width: 100%;
-            height: auto;
-            display: block; /* Ensure this is here to prevent any unwanted margins */
-        }
-        svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Ignore pointer events so clicks pass through to the image below */
-        }
+      #map-container {
+        position: relative;
+        width: 100%;
+        max-width: 720px; /* Adjust based on your map image size */
+        margin: auto;
+      }
+      #map-image {
+        width: 100%;
+        height: auto;
+        display: block; /* Ensure this is here to prevent any unwanted margins */
+      }
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Ignore pointer events so clicks pass through to the image below */
+      }
     </style>
-</head>
-<body>
-  Map your journey
-<div id="map-container">
-    <img id="map-image" src="https://i5.walmartimages.com/asr/a13ca0ae-fabd-474c-a863-b72d7f6521ca.f9ba3f5993ff5b318eeda54dac4939a7.jpeg?odnHeight=640&odnWidth=640&odnBg=FFFFFF" alt="World Map">
-    <svg></svg>
-  <div id="user-count">Users mapping their journey: 0</div>
-</div>
+  </head>
+  <body>
+    
+    <div id="map-container">
+      <img
+        id="map-image"
+        src="https://i5.walmartimages.com/asr/a13ca0ae-fabd-474c-a863-b72d7f6521ca.f9ba3f5993ff5b318eeda54dac4939a7.jpeg?odnHeight=640&odnWidth=640&odnBg=FFFFFF"
+        alt="World Map"
+      />
+      <svg></svg>
+      <div>You're mapping your journey with</div> <div id="user-count"></div>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
-<script src="client.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
+    <script src="client.js"></script>
+  </body>
 </html>
