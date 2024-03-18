@@ -28,6 +28,28 @@
         border-radius: 5px;
         z-index: 3; /* Ensure it's above the canvas and image */
       }
+      #leftArrow,
+      #rightArrow {
+        position: fixed;
+        bottom: 10px;
+        width: 30px;
+        height: 30px;
+        background-color: #000;
+        color: #fff;
+        text-align: center;
+        line-height: 30px;
+        font-size: 24px;
+        text-decoration: none;
+        z-index: 1000;
+      }
+
+      #leftArrow {
+        left: 10px;
+      }
+
+      #rightArrow {
+        right: 10px;
+      }
     </style>
   </head>
   <body>
@@ -40,7 +62,12 @@
       <svg></svg>
       <div id="user-count">Loading...</div>
     </div>
-
+    <a
+      href="https://www.oulipo.xyz/borderline-erase.html"
+      id="rightArrow"
+      target="_blank"
+      >→</a
+    >
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
     <script src="client.js"></script>
   </body>
