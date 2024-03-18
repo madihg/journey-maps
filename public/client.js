@@ -39,5 +39,5 @@ socket.on('drawLine', function(data) {
 
 // Listen for updates on the number of connected users
 socket.on('userCount', function(count) {
-    userCountElement.textContent = `${count} others`;
+    userCountElement.textContent = `${count} other(s)`;
 });

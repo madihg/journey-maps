@@ -18,6 +18,16 @@
         height: 100%;
         pointer-events: none; /* Ignore pointer events so clicks pass through to the image below */
       }
+      #user-count {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px;
+        border-radius: 5px;
+        z-index: 3; /* Ensure it's above the canvas and image */
+      }
     </style>
   </head>
   <body>
@@ -28,8 +38,7 @@
         alt="World Map"
       />
       <svg></svg>
-      <div>You're mapping your journey with</div>
-      <div id="user-count"></div>
+      <div id="user-count">Loading...</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
