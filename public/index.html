@@ -6,7 +6,7 @@
     <title>Interactive Map</title>
     <style>
       #map-image {
-        width: 100%;
+        width: 400px;
         height: auto;
         display: block; /* Ensure this is here to prevent any unwanted margins */
       }
@@ -18,37 +18,26 @@
         height: 100%;
         pointer-events: none; /* Ignore pointer events so clicks pass through to the image below */
       }
+      #textInputContainer {
+        position: fixed; /* Use fixed positioning for constant location */
+        bottom: 10px; /* Adjust vertical position from bottom */
+        left: 10px; /* Adjust horizontal position from left */
+        display: flex; /* Arrange elements horizontally */
+        z-index: 10;
+      }
       #user-count {
-        position: absolute;
-        top: 10px;
-        left: 10px;
+        display: inline-block;
         color: white;
         background: rgba(0, 0, 0, 0.5);
         padding: 5px;
         border-radius: 5px;
-        z-index: 3; /* Ensure it's above the canvas and image */
+        margin-right: 5px; /* Add spacing between elements */
       }
-      #leftArrow,
-      #rightArrow {
-        position: fixed;
-        bottom: 10px;
-        width: 30px;
-        height: 30px;
-        background-color: #000;
-        color: #fff;
-        text-align: center;
-        line-height: 30px;
-        font-size: 24px;
-        text-decoration: none;
-        z-index: 1000;
+      #specialTextField {
+        width: 150px;
       }
-
-      #leftArrow {
-        left: 10px;
-      }
-
-      #rightArrow {
-        right: 10px;
+      .hidden {
+        display: none;
       }
     </style>
   </head>
@@ -60,15 +49,38 @@
         alt="World Map"
       />
       <svg></svg>
-      <div id="user-count">Loading...</div>
     </div>
-    <a
-      href="http://color-the-chameleon.glitch.me"
-      id="rightArrow"
-      target="_blank"
-      >→</a
-    >
+    <div id="textInputContainer">
+      <div id="user-count">Loading...</div>
+      <input
+        type="text"
+        id="specialTextField"
+        placeholder="searching for home"
+      />
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
     <script src="client.js"></script>
+    <script>
+      document
+        .getElementById("specialTextField")
+        .addEventListener("input", function () {
+          const value = this.value;
+          const container = document.getElementById("textInputContainer");
+
+          // Check if the special message is typed and if the button already exists
+          if (
+            value.toLowerCase() === "you are not alone" &&
+            !document.getElementById("specialButton")
+          ) {
+            const button = document.createElement("button");
+            button.id = "specialButton";
+            button.textContent = "maybe";
+            button.onclick = function () {
+              window.location.href = "https://chameleon-final.glitch.me/"; // Replace with the actual URL
+            };
+            container.appendChild(button);
+          }
+        });
+    </script>
   </body>
 </html>
