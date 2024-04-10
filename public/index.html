@@ -52,7 +52,7 @@
     </div>
     <div id="textInputContainer">
       <div id="user-count">Born on a map</div>
-          <input type="text" id="specialTextField" placeholder="" />
+          <input type="text" id="specialTextField" placeholder="searching for home" />
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
     <script src="client.js"></script>
@@ -65,14 +65,14 @@
 
         // Check if the special message is typed and if the button already exists
         if (
-          value.toLowerCase() === "you are not alone" &&
+          value.toLowerCase() === "the animal that" &&
           !document.getElementById("specialButton")
         ) {
           const button = document.createElement("button");
           button.id = "specialButton";
-          button.textContent = "maybe";
+          button.textContent = "changes";
           button.onclick = function () {
-            window.location.href = "https://example.com"; // Replace with the actual URL
+            window.location.href = "https://chameleon-final.glitch.me/"; // Replace with the actual URL
           };
           container.appendChild(button);
         }
