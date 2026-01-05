@@ -18,7 +18,7 @@ let userColor = colors[Math.floor(Math.random() * colors.length)];
 // PartyKit host
 const PARTYKIT_HOST = window.location.hostname === "localhost" 
   ? "localhost:1999" 
-  : "journey-maps.madihg.partykit.dev";
+  : "journeymaps.madihg.partykit.dev";
 
 function connectToParty() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
