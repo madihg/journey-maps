@@ -4,7 +4,6 @@
 const mapImage = document.getElementById('map-image');
 const svg = document.querySelector('svg');
 const userCountElement = document.getElementById('user-count');
-const connectionStatus = document.getElementById('connection-status');
 
 let socket;
 let lastPoint = null;
@@ -16,10 +15,10 @@ const colors = [
 ];
 let userColor = colors[Math.floor(Math.random() * colors.length)];
 
-// PartyKit host - update this after deploying your PartyKit server
+// PartyKit host
 const PARTYKIT_HOST = window.location.hostname === "localhost" 
   ? "localhost:1999" 
-  : "journey-maps.madihg.partykit.dev";  // Update with your PartyKit URL after deploy
+  : "journey-maps.madihg.partykit.dev";
 
 function connectToParty() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -29,7 +28,6 @@ function connectToParty() {
   
   socket.onopen = () => {
     console.log("Connected to PartyKit");
-    updateConnectionStatus('connected', 'Connected');
   };
   
   socket.onmessage = (event) => {
@@ -43,8 +41,8 @@ function connectToParty() {
         // Update user count
         const count = data.count;
         userCountElement.textContent = count === 1 
-          ? 'You are here' 
-          : `${count} travelers drawing`;
+          ? 'Born on a map' 
+          : `${count} other(s) born on a map`;
       }
     } catch (e) {
       console.error("Error parsing message:", e);
@@ -53,29 +51,20 @@ function connectToParty() {
   
   socket.onclose = () => {
     console.log("Disconnected from PartyKit, reconnecting...");
-    updateConnectionStatus('disconnected', 'Reconnecting...');
     setTimeout(connectToParty, 1000);
   };
   
   socket.onerror = (error) => {
     console.error("WebSocket error:", error);
-    updateConnectionStatus('failed', 'Connection error');
   };
 }
 
-function updateConnectionStatus(status, text) {
-  if (connectionStatus) {
-    connectionStatus.className = `status-${status}`;
-    connectionStatus.title = text;
-  }
-}
-
-// Drawing functionality
+// Drawing functionality - click on image to draw
 mapImage.addEventListener('click', function(e) {
   const rect = this.getBoundingClientRect();
-  // Calculate position as percentage of image size for responsive scaling
-  const x = ((e.clientX - rect.left) / rect.width) * 100;
-  const y = ((e.clientY - rect.top) / rect.height) * 100;
+  // Get click position relative to the image
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
 
   if (lastPoint) {
     // Draw line from lastPoint to current point
@@ -97,34 +86,28 @@ mapImage.addEventListener('click', function(e) {
 });
 
 function drawLine(x1, y1, x2, y2, color) {
+  // Get the image's current position to align SVG lines
+  const rect = mapImage.getBoundingClientRect();
+  const containerRect = mapImage.parentElement.getBoundingClientRect();
+  
+  // Offset to align with image position within container
+  const offsetX = rect.left - containerRect.left;
+  const offsetY = rect.top - containerRect.top;
+  
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  // Use percentage-based coordinates
-  line.setAttribute('x1', x1 + '%');
-  line.setAttribute('y1', y1 + '%');
-  line.setAttribute('x2', x2 + '%');
-  line.setAttribute('y2', y2 + '%');
+  line.setAttribute('x1', x1 + offsetX);
+  line.setAttribute('y1', y1 + offsetY);
+  line.setAttribute('x2', x2 + offsetX);
+  line.setAttribute('y2', y2 + offsetY);
   line.setAttribute('stroke', color);
-  line.setAttribute('stroke-width', '2');
+  line.setAttribute('stroke-width', '3');
   line.setAttribute('stroke-linecap', 'round');
   svg.appendChild(line);
-  
-  // Add subtle animation
-  line.style.opacity = '0';
-  requestAnimationFrame(() => {
-    line.style.transition = 'opacity 0.3s ease';
-    line.style.opacity = '1';
-  });
 }
 
 // Double-click to reset your path
 mapImage.addEventListener('dblclick', function() {
   lastPoint = null;
-  // Visual feedback
-  const indicator = document.createElement('div');
-  indicator.className = 'path-reset';
-  indicator.textContent = 'New path started';
-  document.body.appendChild(indicator);
-  setTimeout(() => indicator.remove(), 1500);
 });
 
 // Initialize when page loads
