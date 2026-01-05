@@ -1,6 +1,7 @@
 // PartyKit connection
 let socket;
-let userColor = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`;
+let userColor = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.8)`;
+let lastPoint = null; // Store last click position
 
 // PartyKit host
 const PARTYKIT_HOST = window.location.hostname === "localhost" 
@@ -23,14 +24,22 @@ function connectToParty() {
       
       if (data.type === "draw") {
         // Convert normalized coordinates back to local screen coordinates
-        const localX = data.nx * windowWidth;
-        const localY = data.ny * windowHeight;
-        const localPX = data.npx * windowWidth;
-        const localPY = data.npy * windowHeight;
+        const x = data.nx * windowWidth;
+        const y = data.ny * windowHeight;
         
-        stroke(data.color);
-        strokeWeight(Math.max(5, windowWidth * 0.008)); // Responsive stroke
-        line(localX, localY, localPX, localPY);
+        // Draw dot
+        fill(data.color);
+        noStroke();
+        ellipse(x, y, 10, 10);
+        
+        // Draw line if there's a previous point
+        if (data.hasPrev) {
+          const px = data.npx * windowWidth;
+          const py = data.npy * windowHeight;
+          stroke(data.color);
+          strokeWeight(3);
+          line(px, py, x, y);
+        }
       } else if (data.type === "userCount") {
         document.getElementById('user-count').textContent = `${data.count} other(s) born on a map`;
       }
@@ -62,52 +71,66 @@ function draw() {
   // Empty draw loop needed for p5.js
 }
 
-// Handle both mouse and touch
-function mouseDragged() {
-  sendDrawing(mouseX, mouseY, pmouseX, pmouseY);
-  return false; // Prevent default
-}
-
-function touchMoved() {
-  if (touches.length > 0) {
-    sendDrawing(touches[0].x, touches[0].y, pmouseX, pmouseY);
-  }
-  return false; // Prevent scrolling
-}
-
-function sendDrawing(x, y, px, py) {
+// Click to place dots and draw lines
+function mousePressed() {
+  // Ignore clicks on the input field
+  if (mouseY > windowHeight - 60 && mouseX < 350) return;
+  
+  const x = mouseX;
+  const y = mouseY;
+  
   // Normalize coordinates to 0-1 range for cross-device sync
   const nx = x / windowWidth;
   const ny = y / windowHeight;
-  const npx = px / windowWidth;
-  const npy = py / windowHeight;
   
+  // Draw dot locally
+  fill(userColor);
+  noStroke();
+  ellipse(x, y, 10, 10);
+  
+  // Draw line from last point if exists
+  if (lastPoint) {
+    stroke(userColor);
+    strokeWeight(3);
+    line(lastPoint.x, lastPoint.y, x, y);
+  }
+  
+  // Send to others
   if (socket && socket.readyState === WebSocket.OPEN) {
     let data = {
       type: "draw",
       nx: nx,
       ny: ny,
-      npx: npx,
-      npy: npy,
+      npx: lastPoint ? lastPoint.x / windowWidth : null,
+      npy: lastPoint ? lastPoint.y / windowHeight : null,
+      hasPrev: lastPoint !== null,
       color: userColor
     };
     socket.send(JSON.stringify(data));
   }
   
-  // Draw locally for immediate feedback
-  stroke(userColor);
-  strokeWeight(Math.max(5, windowWidth * 0.008)); // Responsive stroke
-  line(x, y, px, py);
+  // Update last point
+  lastPoint = { x, y };
+}
+
+// Double-click to reset path (start fresh)
+function doubleClicked() {
+  lastPoint = null;
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  clear(); // Clear on resize (drawings will be lost locally but that's ok)
+  clear();
+  lastPoint = null; // Reset on resize
 }
 
-// Prevent touch scrolling on the canvas
-document.addEventListener('touchmove', function(e) {
-  if (e.target.tagName === 'CANVAS') {
-    e.preventDefault();
+// Touch support
+function touchStarted() {
+  if (touches.length > 0) {
+    // Simulate mouse press at touch location
+    mouseX = touches[0].x;
+    mouseY = touches[0].y;
+    mousePressed();
   }
-}, { passive: false });
+  return false; // Prevent default
+}
