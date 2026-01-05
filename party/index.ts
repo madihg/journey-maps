@@ -1,6 +1,6 @@
 import type * as Party from "partykit/server";
 
-export default class JourneyRoom implements Party.Server {
+export default class DrawingRoom implements Party.Server {
   constructor(readonly room: Party.Room) {}
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
@@ -17,8 +17,8 @@ export default class JourneyRoom implements Party.Server {
     try {
       const data = JSON.parse(message);
       
-      if (data.type === "drawLine") {
-        // Broadcast line data to all OTHER clients (not the sender)
+      if (data.type === "draw") {
+        // Broadcast drawing data to all OTHER clients (not the sender)
         this.room.broadcast(message, [sender.id]);
       }
     } catch (e) {
@@ -34,4 +34,3 @@ export default class JourneyRoom implements Party.Server {
     }));
   }
 }
-

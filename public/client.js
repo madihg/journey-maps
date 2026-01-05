@@ -1,19 +1,6 @@
-// Journey Maps - Real-time collaborative drawing
-// Using PartyKit for real-time communication
-
-const mapImage = document.getElementById('map-image');
-const svg = document.querySelector('svg');
-const userCountElement = document.getElementById('user-count');
-
+// PartyKit connection
 let socket;
-let lastPoint = null;
-
-// Color palette for users
-const colors = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-  '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-];
-let userColor = colors[Math.floor(Math.random() * colors.length)];
+let userColor = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`;
 
 // PartyKit host
 const PARTYKIT_HOST = window.location.hostname === "localhost" 
@@ -34,15 +21,18 @@ function connectToParty() {
     try {
       const data = JSON.parse(event.data);
       
-      if (data.type === "drawLine") {
-        // Drawing received from another user
-        drawLine(data.from.x, data.from.y, data.to.x, data.to.y, data.color);
+      if (data.type === "draw") {
+        // Convert normalized coordinates back to local screen coordinates
+        const localX = data.nx * windowWidth;
+        const localY = data.ny * windowHeight;
+        const localPX = data.npx * windowWidth;
+        const localPY = data.npy * windowHeight;
+        
+        stroke(data.color);
+        strokeWeight(Math.max(5, windowWidth * 0.008)); // Responsive stroke
+        line(localX, localY, localPX, localPY);
       } else if (data.type === "userCount") {
-        // Update user count
-        const count = data.count;
-        userCountElement.textContent = count === 1 
-          ? 'Born on a map' 
-          : `${count} other(s) born on a map`;
+        document.getElementById('user-count').textContent = `${data.count} other(s) born on a map`;
       }
     } catch (e) {
       console.error("Error parsing message:", e);
@@ -59,56 +49,65 @@ function connectToParty() {
   };
 }
 
-// Drawing functionality - click on image to draw
-mapImage.addEventListener('click', function(e) {
-  const rect = this.getBoundingClientRect();
-  // Get click position relative to the image
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  if (lastPoint) {
-    // Draw line from lastPoint to current point
-    drawLine(lastPoint.x, lastPoint.y, x, y, userColor);
-    
-    // Broadcast to others via PartyKit
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({
-        type: "drawLine",
-        from: lastPoint,
-        to: { x, y },
-        color: userColor
-      }));
-    }
-  }
+function setup() {
+  let cnv = createCanvas(windowWidth, windowHeight);
+  cnv.position(0, 0);
+  cnv.style('z-index', '2');
+  clear(); // Transparent background
   
-  // Update lastPoint
-  lastPoint = { x, y };
-});
-
-function drawLine(x1, y1, x2, y2, color) {
-  // Get the image's current position to align SVG lines
-  const rect = mapImage.getBoundingClientRect();
-  const containerRect = mapImage.parentElement.getBoundingClientRect();
-  
-  // Offset to align with image position within container
-  const offsetX = rect.left - containerRect.left;
-  const offsetY = rect.top - containerRect.top;
-  
-  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  line.setAttribute('x1', x1 + offsetX);
-  line.setAttribute('y1', y1 + offsetY);
-  line.setAttribute('x2', x2 + offsetX);
-  line.setAttribute('y2', y2 + offsetY);
-  line.setAttribute('stroke', color);
-  line.setAttribute('stroke-width', '3');
-  line.setAttribute('stroke-linecap', 'round');
-  svg.appendChild(line);
+  connectToParty();
 }
 
-// Double-click to reset your path
-mapImage.addEventListener('dblclick', function() {
-  lastPoint = null;
-});
+function draw() {
+  // Empty draw loop needed for p5.js
+}
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', connectToParty);
+// Handle both mouse and touch
+function mouseDragged() {
+  sendDrawing(mouseX, mouseY, pmouseX, pmouseY);
+  return false; // Prevent default
+}
+
+function touchMoved() {
+  if (touches.length > 0) {
+    sendDrawing(touches[0].x, touches[0].y, pmouseX, pmouseY);
+  }
+  return false; // Prevent scrolling
+}
+
+function sendDrawing(x, y, px, py) {
+  // Normalize coordinates to 0-1 range for cross-device sync
+  const nx = x / windowWidth;
+  const ny = y / windowHeight;
+  const npx = px / windowWidth;
+  const npy = py / windowHeight;
+  
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    let data = {
+      type: "draw",
+      nx: nx,
+      ny: ny,
+      npx: npx,
+      npy: npy,
+      color: userColor
+    };
+    socket.send(JSON.stringify(data));
+  }
+  
+  // Draw locally for immediate feedback
+  stroke(userColor);
+  strokeWeight(Math.max(5, windowWidth * 0.008)); // Responsive stroke
+  line(x, y, px, py);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  clear(); // Clear on resize (drawings will be lost locally but that's ok)
+}
+
+// Prevent touch scrolling on the canvas
+document.addEventListener('touchmove', function(e) {
+  if (e.target.tagName === 'CANVAS') {
+    e.preventDefault();
+  }
+}, { passive: false });
