@@ -2,8 +2,6 @@
 
 A collaborative real-time drawing experience on a world map. Trace your journey and see others' paths unfold in real-time.
 
-![Journey Maps](https://static.vecteezy.com/system/resources/previews/010/158/604/non_2x/white-background-of-world-map-with-line-art-design-free-vector.jpg)
-
 ## Features
 
 - 🗺️ Draw on a world map by clicking to create connected paths
@@ -12,71 +10,77 @@ A collaborative real-time drawing experience on a world map. Trace your journey 
 - ✨ Double-click to start a new path
 - 🔮 Hidden easter egg... can you find it?
 
-## Getting Started
+## Tech Stack
 
-### Quick Deploy to Vercel
+- **Frontend**: Vanilla HTML, CSS, JavaScript (hosted on Vercel)
+- **Real-time**: [PartyKit](https://partykit.io) for WebSocket connections
+- **No database required**: State is ephemeral, drawings exist only in active sessions
+
+## Deployment
+
+This project requires two deployments:
+
+### 1. Deploy PartyKit Server (real-time backend)
+
+```bash
+# Install dependencies
+npm install
+
+# Deploy to PartyKit
+npm run deploy:partykit
+```
+
+After deploying, you'll get a URL like `journey-maps.YOUR_USERNAME.partykit.dev`
+
+Update `public/client.js` with your PartyKit URL:
+```javascript
+const PARTYKIT_HOST = window.location.hostname === "localhost" 
+  ? "localhost:1999" 
+  : "journey-maps.YOUR_USERNAME.partykit.dev";  // <- Update this
+```
+
+### 2. Deploy Frontend to Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/madihg/journey-maps)
 
-### Local Development
+Or manually:
+1. Push to GitHub
+2. Import the repo in Vercel
+3. Deploy (it will use the `public/` folder)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/madihg/journey-maps.git
-   cd journey-maps
-   ```
+## Local Development
 
-2. Serve the public folder:
-   ```bash
-   npx serve public
-   ```
+```bash
+# Install dependencies
+npm install
 
-3. Open `http://localhost:3000` in your browser
+# Start PartyKit dev server (runs on localhost:1999)
+npm run dev
 
-## Enabling Real-time Collaboration
-
-The app uses [Ably](https://ably.com) for real-time features. Without configuration, it runs in local-only mode (your drawings won't sync with others).
-
-### To enable real-time sync:
-
-1. Sign up for a free Ably account at [ably.com/signup](https://ably.com/signup)
-2. Create an app and get your API key
-3. Add your API key in `public/index.html` before the client.js script:
-
-```html
-<script>window.ABLY_KEY = 'your-ably-api-key-here';</script>
+# Open public/index.html in your browser, or serve it:
+npx serve public
 ```
-
-> ⚠️ **Note**: For production, you should use Ably's [token authentication](https://ably.com/docs/auth/token) instead of exposing your API key. This typically involves a small serverless function.
-
-### Ably Free Tier
-
-Ably's free tier includes:
-- 6 million messages/month
-- 200 peak connections
-- More than enough for this project!
 
 ## How It Works
 
-- Click on the map to place points
-- Each subsequent click draws a line from the previous point
-- Double-click to reset and start a new path
-- See other users' paths appear in real-time (when Ably is configured)
+1. Click on the map to place points
+2. Each subsequent click draws a line from the previous point
+3. Double-click to reset and start a new path
+4. See other users' paths appear in real-time
 
-## Tech Stack
+## Project Structure
 
-- **Frontend**: Vanilla HTML, CSS, JavaScript
-- **Real-time**: [Ably](https://ably.com) (replaces socket.io for serverless compatibility)
-- **Hosting**: [Vercel](https://vercel.com) (static deployment)
-- **No database required**: State is ephemeral, drawings exist only in active sessions
-
-## Why Ably instead of Socket.io?
-
-Vercel is a serverless platform, which means traditional WebSocket servers (like socket.io) don't work because:
-- Serverless functions are stateless and short-lived
-- They can't maintain persistent WebSocket connections
-
-Ably provides a managed real-time infrastructure that works perfectly with serverless deployments.
+```
+journey-maps/
+├── party/
+│   └── index.ts      # PartyKit server (handles real-time sync)
+├── public/
+│   ├── index.html    # Frontend
+│   └── client.js     # Client-side WebSocket logic
+├── partykit.json     # PartyKit configuration
+├── vercel.json       # Vercel configuration
+└── package.json
+```
 
 ## License
 

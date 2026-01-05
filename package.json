@@ -2,20 +2,25 @@
   "name": "journey-maps",
   "version": "1.0.0",
   "description": "Collaborative drawing on a world map - trace your journey with others in real-time",
-  "private": true,
   "scripts": {
-    "dev": "npx serve public",
-    "build": "echo 'Static site - no build needed'"
+    "dev": "partykit dev",
+    "deploy:partykit": "partykit deploy"
   },
-  "keywords": [
-    "map",
-    "collaborative",
-    "realtime",
-    "drawing"
-  ],
+  "dependencies": {
+    "partysocket": "^1.0.1"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.111"
+  },
+  "engines": {
+    "node": "18.x"
+  },
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/madihg/journey-maps.git"
-  }
+  "keywords": [
+    "collaborative",
+    "drawing",
+    "partykit",
+    "realtime",
+    "map"
+  ]
 }

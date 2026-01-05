@@ -1,117 +1,72 @@
 // Journey Maps - Real-time collaborative drawing
-// Using Ably for real-time communication (works with Vercel serverless)
+// Using PartyKit for real-time communication
 
 const mapImage = document.getElementById('map-image');
 const svg = document.querySelector('svg');
 const userCountElement = document.getElementById('user-count');
 const connectionStatus = document.getElementById('connection-status');
 
+let socket;
 let lastPoint = null;
-let userColor = generateColor();
-let ably = null;
-let channel = null;
-let clientId = generateClientId();
 
 // Color palette for users
 const colors = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
   '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
 ];
+let userColor = colors[Math.floor(Math.random() * colors.length)];
 
-function generateColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
-}
+// PartyKit host - update this after deploying your PartyKit server
+const PARTYKIT_HOST = window.location.hostname === "localhost" 
+  ? "localhost:1999" 
+  : "journey-maps.madihg.partykit.dev";  // Update with your PartyKit URL after deploy
 
-function generateClientId() {
-  return 'user_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Initialize Ably connection
-async function initRealtime() {
-  // Using Ably's token authentication for client-side
-  // For production, you'd want to set up token auth via your own endpoint
-  // For demo purposes, we use an anonymous connection with a public demo key
+function connectToParty() {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${protocol}//${PARTYKIT_HOST}/party/main`;
   
-  const ABLY_KEY = window.ABLY_KEY || 'demo'; // Set your Ably API key
+  socket = new WebSocket(wsUrl);
   
-  if (ABLY_KEY === 'demo') {
-    // Fallback to local-only mode if no API key
-    console.log('No Ably API key set - running in local-only mode');
-    updateConnectionStatus('local', 'Local mode');
-    setupLocalOnlyMode();
-    return;
-  }
-
-  try {
-    ably = new Ably.Realtime({
-      key: ABLY_KEY,
-      clientId: clientId
-    });
-
-    ably.connection.on('connected', () => {
-      console.log('Connected to Ably');
-      updateConnectionStatus('connected', 'Connected');
-    });
-
-    ably.connection.on('disconnected', () => {
-      updateConnectionStatus('disconnected', 'Reconnecting...');
-    });
-
-    ably.connection.on('failed', () => {
-      updateConnectionStatus('failed', 'Connection failed');
-      setupLocalOnlyMode();
-    });
-
-    // Subscribe to the journey-maps channel
-    channel = ably.channels.get('journey-maps');
-
-    // Listen for lines drawn by others
-    channel.subscribe('drawLine', (message) => {
-      if (message.clientId !== clientId) {
-        const data = message.data;
+  socket.onopen = () => {
+    console.log("Connected to PartyKit");
+    updateConnectionStatus('connected', 'Connected');
+  };
+  
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === "drawLine") {
+        // Drawing received from another user
         drawLine(data.from.x, data.from.y, data.to.x, data.to.y, data.color);
+      } else if (data.type === "userCount") {
+        // Update user count
+        const count = data.count;
+        userCountElement.textContent = count === 1 
+          ? 'You are here' 
+          : `${count} travelers drawing`;
       }
-    });
-
-    // Track presence (user count)
-    await channel.presence.enter({ color: userColor });
-
-    channel.presence.subscribe('enter', updateUserCount);
-    channel.presence.subscribe('leave', updateUserCount);
-
-    // Initial user count
-    updateUserCount();
-
-  } catch (error) {
-    console.error('Failed to connect to Ably:', error);
-    updateConnectionStatus('failed', 'Offline mode');
-    setupLocalOnlyMode();
-  }
-}
-
-function setupLocalOnlyMode() {
-  // In local mode, drawing still works but isn't shared
-  userCountElement.textContent = 'Drawing locally';
-}
-
-async function updateUserCount() {
-  if (!channel) return;
+    } catch (e) {
+      console.error("Error parsing message:", e);
+    }
+  };
   
-  try {
-    const members = await channel.presence.get();
-    const count = members.length;
-    userCountElement.textContent = count === 1 
-      ? 'You are here' 
-      : `${count} travelers drawing`;
-  } catch (error) {
-    console.error('Error getting presence:', error);
-  }
+  socket.onclose = () => {
+    console.log("Disconnected from PartyKit, reconnecting...");
+    updateConnectionStatus('disconnected', 'Reconnecting...');
+    setTimeout(connectToParty, 1000);
+  };
+  
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+    updateConnectionStatus('failed', 'Connection error');
+  };
 }
 
 function updateConnectionStatus(status, text) {
   if (connectionStatus) {
     connectionStatus.className = `status-${status}`;
-    connectionStatus.textContent = text;
+    connectionStatus.title = text;
   }
 }
 
@@ -126,13 +81,14 @@ mapImage.addEventListener('click', function(e) {
     // Draw line from lastPoint to current point
     drawLine(lastPoint.x, lastPoint.y, x, y, userColor);
     
-    // Broadcast to others
-    if (channel) {
-      channel.publish('drawLine', {
+    // Broadcast to others via PartyKit
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({
+        type: "drawLine",
         from: lastPoint,
         to: { x, y },
         color: userColor
-      });
+      }));
     }
   }
   
@@ -172,4 +128,4 @@ mapImage.addEventListener('dblclick', function() {
 });
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', initRealtime);
+document.addEventListener('DOMContentLoaded', connectToParty);
