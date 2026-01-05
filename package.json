@@ -1,28 +1,21 @@
 {
-  "//1": "describes your app and its dependencies",
-  "//2": "https://docs.npmjs.com/files/package.json",
-  "//3": "updating this file will download and update your packages",
-  "name": "my-glitch-app",
-  "version": "0.0.1",
-  "description": "What am I about?",
-  "main": "server.js",
+  "name": "journey-maps",
+  "version": "1.0.0",
+  "description": "Collaborative drawing on a world map - trace your journey with others in real-time",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "dev": "npx serve public",
+    "build": "echo 'Static site - no build needed'"
   },
-  "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^4.2.0"
-  },
-  "engines": {
-    "node": "16.x"
-  },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/welcome-project"
-  },
-  "license": "MIT",
   "keywords": [
-    "node",
-    "glitch",
-    "express"
-  ]
+    "map",
+    "collaborative",
+    "realtime",
+    "drawing"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madihg/journey-maps.git"
+  }
 }
