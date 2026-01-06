@@ -120,14 +120,14 @@
         const container = document.getElementById("textInputContainer");
 
         if (
-          value.toLowerCase() === "the chameleon skin" &&
+          value.toLowerCase() === "shape" &&
           !document.getElementById("specialButton")
         ) {
           const button = document.createElement("button");
           button.id = "specialButton";
-          button.textContent = "I grew";
+          button.textContent = "shifting";
           button.onclick = function () {
-            window.location.href = "https://chameleon-final-2.glitch.me/";
+            window.location.href = "https://chameleon-shapes.vercel.app/";
           };
           container.appendChild(button);
         }
